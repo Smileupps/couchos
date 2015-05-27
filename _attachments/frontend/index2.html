@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en" ng-app="myApp">
+<head>
+  <base href="../">
+  <meta charset="utf-8">
+  <title>Chatty Couchapp Frontend</title>
+  <META NAME="author" CONTENT="www.smileupps.com">
+  <META NAME="description" CONTENT="Couchapp Editor">
+
+  <link rel="stylesheet" href="_editor/common/css/cw.general.css">
+  <link rel="stylesheet" href="_editor/common/css/cw.css">
+  <link rel="stylesheet" href="_editor/common/css/all.min.css">
+  <link rel="stylesheet" href="_editor/common/css/app.css">
+
+  <!--<script src="_editor/common/js/jquery-1.10.2.min.js"></script>-->
+  <script src="_editor/common/js/cw.general.js"></script>
+  <script src="_editor/common/js/angular.min.js"></script>
+  <script src="_editor/common/js/ui-bootstrap-tpls-0.12.0.min.js"></script>
+  <script src="_editor/common/js/widgets.min.js"></script>
+  <script src="_editor/common/js/notifications.min.js"></script>
+
+  <script src="_editor/common/js/jszip.js"></script>
+  <script src="_editor/common/js/jszip-utils.js"></script>
+  <script src="_editor/common/js/mime-types.js"></script>
+
+  <script src="_editor/common/js/ng/f_happy.js"></script>
+  <script src="_editor/common/js/ng/d_widgets.js"></script>
+  <script src="_editor/js/app.js"></script>
+  <script src="_editor/common/js/ng/c_user.js"></script>
+  <script src="_editor/common/js/json-stable-stringify.js"></script>
+</head>
+<body ng-controller="AppCtrl">
+
+	<div class="container">
+
+    <form ng-controller="LoginCtrl" ng-if="!happy.loggedIn" style="width:600px;margin:0 auto;">
+      <h1 class="text-center">Smileupps Couchapp OS</h1>
+      <p class="text-center">A web interface for your Couchapps</p>
+      <ul class="note">
+        <li>This app provides a <a href="/_editor">Couchapp Editor</a>, a <a href="/_costco">Bulk Docs Editor</a> and restricted admin-only access to <a href="/_utils" target="_blank">Futon</a> and <a href="/_utils/fauxton/" target="_blank">Fauxton</a></li>
+        <li>This app is a couchapp itself, served from your CouchDB instance, stored in /ceditor/_design/ceditor. Please don't remove it!!!</li>
+        <li>Source code of this app can be found on <a href="https://github.com/Smileupps/couchapp-editor" target="_blank">Github</a></li>
+        <li>Thanks to <a href="https://github.com/ermouth" target="_blank">ermouth</a> for Json Editor and <a href="https://github.com/harthur" target="_blank">harthur</a> for bulk editor</li>
+      </ul>
+      <p>Enter your CouchDB administrator credentials:</p>
+      <label for="inputEmail" class="sr-only">Username</label>
+      <input type="text" id="inputEmail" class="form-control" placeholder="Username" required autofocus ng-model="fields.username">
+      <label for="inputPassword" class="sr-only">Password</label>
+      <input type="password" id="inputPassword" class="form-control" placeholder="Password" required ng-model="fields.password">
+      <div class="text-center"><button ng-click="submit('login')" class="button  p10">Sign in</button></div>
+    </form>
+
+
+    <iframe height="100%" width="100%"  src="_editor/index.html">
+    </iframe>
+
+  </div> <!-- /container -->
+
+
+</body>
+</html>

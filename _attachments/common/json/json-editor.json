@@ -1,0 +1,424 @@
+{
+	"===README===": "This is jquerymy manifest of JSON editor, now it shows source code of itself. \nTo export or edit node (or doc) as JSON, click button with a bag at right.\n\nYou can use this editor in your project – it’s more or less self-contained and \nincorporates ~all app specific HTML, CSS and code.\n\nTo start properly editor requires these components:\n\t— jQuery 1.11+\n\t— SugarJS 1.4 or 1.4.1\n\t— jQuery.my 1.1+\n\t– jQuery.tags plugin\n\nAll these plugins can be loaded from cloudwall.me CDN as a single script \n\n\t<script src=\"http://cdn.cloudwall.me/1.0/cw.minimal.js\"></script>\n\t\nRight now you also need some additional CSS files, but soon this\ndependency will be eliminated.\n\nTo init instance of JSON editor, use code like\n\n\tvar manifest = { /* Here goes this JSON doc */};\n\t$(\"#containerForEditor\").my(manifest, doc);\n\nNote, that editor mutates source obj in doc variable. \n",
+	"id": "cw.Demo.JSONEditor.Editor",
+	"require": [{
+			"this.data.Samples": "_editor/common/json/json-editor-samples.json",
+			"window.CodeMirror": "_editor/common/js/codemirror.js"
+		}],
+	"title": "Manifest of this app",
+	"expose": ["Root",
+		"Lib"],
+	"Root": "function (){ return this; }",
+	"params": {
+		"restyle": 100
+	},
+	"Lib": {
+		"keybind": "function (d,v){ \n\t\t\treturn (!/^(|\\s+)$/.test(d.key))?d.key//.truncate(50,'right','…')\n:'\"'+d.key+'\"'; \n\t\t}",
+		"relist": "function ($o, that/*, form*/){\n\t\t\tvar form = that;\n\t\t\tthat.List = that.Root().MakeList(form.data);\n\t\t\t$o.find(\".ilist:eq(0)\").trigger(\"recalc\");\n\t\t\t$o.find(\".idesc:eq(0)\").trigger(\"check\");\n\t\t}",
+		"kick": "function (cont, obj){\n\t\t\tfor (var i in cont) delete cont[i];\n\t\t\tObject.merge(cont,obj);\n\t\t}"
+	},
+	"MemState": "function (node) {\n\t\tvar d = this.data, old;\n\t\tif (!d.viewstate) this.data.viewstate={};\n\t\told = d.viewstate[node.path.join('❀')+'❀'+node.key];\n\t\tif (old != node.state) {\n\t\t\td.viewstate[node.path.join('❀')+'❀'+node.key] = node.state;\n\t\t\tif (d._id) this.MemStateSave();\n\t\t}\n\t}",
+	"MemStateSave": "function (){\n\t\t// debounced by init\n\t\tvar d = this.data;\n\t\tif (d._id && Object.size(d.viewstate)) {\n\t\t\tthis.Ls(\"viewstate.\"+d._id, {stamp:Date.now(), state:d.viewstate});\n\t\t}\n\t}",
+	"data": {
+		"doc": {
+		},
+		"tree": {
+		},
+		"cmd": "",
+		"title": "Untitled JSON",
+		"raw": ""
+	},
+	"init": "function ($o, form) {\n\tvar i, that = this, \n\t\t\tdur = Date.now();\n\t\n\t\t\n\t// Singletone constructors init\n\tthat.Ls = that.Ls(\"\");\n\tif (Object.isFunction(that.Db)) that.Db = that.Db($o);\n\t\n\t// Render HTML\n\t$o.html(that.HTML.Main);\n\t\n\t// Mount app manifest itself as a sample JSON\n\tform.data.Samples.complex = JSON.parse(\n\t\t$.my.tojson(\n\t\t\t$.extend(\n\t\t\t\t// Assure README goes first\n\t\t\t\t{\"===README===\":\"\"},\n\t\t\t\t// Remove unnecessery nodes\n\t\t\t\tObject.reject(form, [\"data\",\"app\"])\n\t\t\t)\n\t\t)\n\t);\n\t\n\t// Save samples if none\n\tif (!that.Ls(\"items\")) {\n\t\tfor (i in form.data.Samples) {\n\t\t\tthat.Db.put({\n\t\t\t\t_id:\"\",\n\t\t\t\tdoc:form.data.Samples[i]\n\t\t\t});\n\t\t}\n\t}\n\t\n\t// Debounce viewstate saver\n\tthat.MemStateSave = that.MemStateSave.debounce(700);\n\t\n\t// First recursion step\n\t$.extend(that.Doc, {\n\t\tstate:2,\n\t\tlevel:0,\n\t\tpath:[],\n\t\ttype:\"object\",\n\t\tkey:\"Root\",\n\t\tvalue:form.data.doc\n\t});\n\t\n\t// Samples\n\t$o.on(\"click.my\", \"#samples .pseudolink\", function(evt){\n\t\tvar i = $(this).data(\"idx\");\n\t\t$.extend(form.data.doc, form.data.Samples[i]);\n\t\tthat.Doc.state=1;\n\t\t$o.find(\".doc\").trigger(\"recalc\");\n\t\t$o.find(\".doc .idesc:eq(0)\").trigger(\"click\");\n\t});\n\n\t// Global handlers for buttons\n\t[\"add\",\"takeout\",\"copy\",\"collapse\",\"open\",\"download\"].each(function(e){\n\t\t$o.on(\"click.my\", \".btn-\"+e, that.Event[e].fill(undefined, undefined, that, $o))\n\t});\n\t\n\t// Clean doc\n\t$o.on(\"click.my\", \".doc>.iact>.btn-del\", function(evt){\n\t\tevt.stopPropagation();\n\t\tfor (var i in form.data.doc) delete form.data.doc[i];\n\t\t$o.find(\".doc\").trigger(\"recalc\");\n\t});$o.parent().trigger('editor-ready');\n\n\t\t}",
+	"die": "function (){\n\t\tvar i, b = this.Blobs;\n\t\t// Free blobs objURLs cache\n\t\tfor (i in b) URL.revokeObjectURL (b[i]);\n\t}",
+	"Blobs": {
+	},
+	"Doc": {
+	},
+	"ui": {
+		".btn-save": {
+			"bind": "function (d,v,$o){\n\t\t\tvar that =this;\n\t\t\tif (v!=null) {\n\t\t\t\twindow.saveDdoc($o,function(res){\n\t\t\t\t\td._id = res._id;\n\t\t\t\t\td._rev = res._rev;//that.Db.put(d)\n\t\t\t\t})\n\t\t\t}\n\t\t}"
+		},
+		".doctitle": {
+			"bind": "title",
+			"watch": ".doc",
+			"delay": 30
+		},
+		".doc": {
+			"delay": 50,
+			"bind": "this.Doc",
+			"check": false,
+			"manifest": "function (e){\n\t\t\treturn this.$multi;\n\t\t}"
+		},
+		".editor": {
+			"delay": 200,
+			"watch": ".doc",
+			"css": {
+				"hide": "function (d){return !Object.size(d.doc)}"
+			}
+		},
+		".rawjson": {
+			"delay": 200,
+			"bind": "raw",
+			"css": {
+				"self:red": "function (d){ return !this.Parsed && !!d.raw; }"
+			}
+		},
+		".start": {
+			"css": {
+				"hide": "function (d){return !!Object.size(d.doc)}"
+			},
+			"watch": ".doc",
+			"delay": 50
+		},
+		".proxy": {
+			"bind": "function (d,v,$o){\n\t\t\tvar parse;\n\t\t\ttry {\n\t\t\t\tparse = eval(\"(\"+d.raw+\")\");\n\t\t\t\tif (!Object.isObject(parse) && !Object.isArray(parse)) parse=null;\n\t\t\t\telse parse = JSON.parse($.my.tojson(parse));\n\t\t\t}catch(e){}\n\t\t\tthis.Parsed = parse&&Object.size(parse)?parse:null;\n\t\t}",
+			"watch": ".rawjson",
+			"recalc": ".rawjson",
+			"delay": 10
+		},
+		".btn-parse": {
+			"bind": "function (d,v,$o){\n\t\t\tif (v!=null && this.Parsed) {\n\t\t\t\t$.extend(d.doc, this.Parsed);\n\t\t\t\td._id = \"\";\n\t\t\t\tthis.Doc.state=1;\n\t\t\t\t$o.my(\"find\",\".doc .idesc:eq(0)\").trigger(\"click\");\n\t\t\t}\n\t\t}",
+			"watch": ".proxy",
+			"css": {
+				":disabled": "function (){return !this.Parsed}"
+			}
+		}
+	},
+	"HTML": {
+		"Main": "<section style=\"padding-left:23px;\">\n\t<section class=\"editor dib hide w100p\">\n\t\t<input type=\"text\" class=\"doctitle col-xs-7 pt7 pb7 pl12\" placeholder=\"Target Database\"><div class=\"col-xs-1\"><img class=\"loading\" src=\"/_editor/common/css/img/spinner.gif\" /></div><button class=\"btn-save button mr0 p10 col-xs-4\"><i class=\"fi fi-save\"></i>&thinsp;Save (ALT+S)</button>\n\t\t<div class=\"pb5 col-xs-12\"><p class=\"red\"><i class=\"fi-info\"></i> For ddoc info, look at <i>README.md</i> field below</p></div><div class=\"doc irow\t\"></div>\n\t</section><section \n\t class=\"start hide w100p dib vat\">\n\t\t<div class=\"\" style=\"margin:0px auto 0px auto;\">\n\t\t\t<h3 class=\" ml-2\">Paste JSON ⇣</h3>\t\n\t\t\t<div><textarea class=\"rawjson fs90 p20 w100p\" \n\t\t\t\tstyle=\"min-height:300px; tab-size:2; max-height:700px; overflow:auto;overflow:overlay;\"\n\t\t\t\tplaceholder=\"Paste JSON or write javascript expression, that evaluates to object/array.\nSomething like {x:Date.now(), y:'ABC'.codes()} is ok.\"\n\t\t\t></textarea>\t</div>\n\t\t\t<div class=\"tac fs120\">\n\t\t\t\t<button class=\"button w200 br100 green btn-parse\">Parse and edit</button>\n\t\t\t</div>\n\t\t\t<div class=\"proxy hide\"></div>\n\t\t\t<div class=\"tac mt10\" id=\"samples\">\n\t\t\t\tOr select a doc from the left column\n\t\t\t</div>\n\t\t</div>\n\t</section>\n</section>",
+		"ItemComplex": "<div class=\"inav\"><a href=\"http://docs.couchdb.org/en/latest/intro/api.html?#attachments\" target=\"_blank\" \nclass=\"btn-attachments attachments\" title=\"Help on Attachments\"><span class=\"fi-paperclip\"></span></a><a href=\"http://docs.couchdb.org/en/latest/couchapp/ddocs.html#view-functions\" target=\"_blank\" \nclass=\"btn-views views\"  title=\"Help on Views\"><span class=\"fi-list-thumbnails\"></span></a><a href=\"http://docs.couchdb.org/en/latest/couchapp/ddocs.html#filter-functions\" target=\"_blank\" \nclass=\"btn-filters filters\"  title=\"Help on Filters\"><span class=\"fi-filter\"></span></a><a href=\"http://docs.couchdb.org/en/latest/couchapp/ddocs.html#update-functions\" target=\"_blank\" \nclass=\"btn-updates updates\" title=\"Help on Updates\"><span class=\"fi-save\"></span></a><a href=\"http://docs.couchdb.org/en/latest/couchapp/ddocs.html#list-functions\" target=\"_blank\" \nclass=\"btn-lists lists\"  title=\"Help on Lists\"><span class=\"fi-page-edit\"></span></a><a href=\"http://docs.couchdb.org/en/latest/couchapp/ddocs.html#show-functions\" target=\"_blank\" \nclass=\"btn-shows shows\"  title=\"Help on Shows\"><span class=\"fi-magnifying-glass\"></span></a><a href=\"http://docs.couchdb.org/en/latest/api/ddoc/rewrites.html\" target=\"_blank\" \nclass=\"btn-rewrites rewrites\"  title=\"Help on Rewrites\"><span class=\"fi-arrow-right\"></span></a><div \nclass=\"ikey\"></div><div class=\"idesc blue cp\">–</div></div><div\nclass=\"ivalue imulti hide\"><div \nclass=\"ilist\" ><div class=\"irow\"></div></div></div><div class=\"iact buttons\"><button \nclass=\"btn-add button green\"  title=\"Add new property\">&thinsp;&thinsp;<span class=\"fi-plus\"></span>&thinsp;<span class=\"fi-paperclip attachments\"></span><span class=\"fi-list-thumbnails views\"></span><span class=\"fi-filter filters\"></span><span class=\"fi-save updates\"></span><span class=\"fi-page-edit lists\"></span><span class=\"fi-magnifying-glass shows\"></span><span class=\"fi-arrow-right rewrites\"></span>&thinsp;</button><a href=\"javascript:void(0)\" \nclass=\"button green attachments\"  title=\"Open\" target=\"_blank\"><span class=\"fi-link\"></span></a><button \nclass=\"btn-download button green attachments\"  title=\"Download attachment\"><span class=\"fi-page-edit\"></span></button><!--<button \nclass=\"btn-views-menu button green views\"  title=\"Views (Queries)\">&thinsp;&thinsp;<span class=\"fi-list-thumbnails\"></span>&thinsp;</button><button \nclass=\"btn-filters-menu button green filters\"  title=\"Changes/Repl Filters\">&thinsp;&thinsp;<span class=\"fi-filter\"></span>&thinsp;</button><button \nclass=\"btn-updates-menu button green updates\"  title=\"Update Funcs\">&thinsp;&thinsp;<span class=\"fi-save\"></span>&thinsp;</button><button \nclass=\"btn-lists-menu button green lists\"  title=\"Lists (N-doc)\">&thinsp;&thinsp;<span class=\"fi-page-edit\"></span>&thinsp;</button><button \nclass=\"btn-shows-menu button green shows\"  title=\"Shows (1-doc)\">&thinsp;&thinsp;<span class=\"fi-magnifying-glass\"></span>&thinsp;</button><button \nclass=\"btn-rewrites-menu button green rewrites\"  title=\"Rewrites\">&thinsp;<span class=\"fi-arrow-right\"></span>&thinsp;</button>--><button \nclass=\"btn-takeout button\"  title=\"Upload / Edit JSON\"><span class=\"fi-upload\"></span>&thinsp;&thinsp;<span class=\"fi-pencil\"></span></button><button \nclass=\"btn-copy button\" title=\"Save to clipboard\"><span class=\"fi-bookmark\"></span></button><button \nclass=\"btn-del button red\"  title=\"Del node\">&thinsp;<span class=\"fi-x\"></span>&thinsp;</button></div>",
+		"ItemSimple": "<div class=\"inav\"><a href=\"http://docs.couchdb.org/en/latest/intro/api.html?#attachments\" target=\"_blank\" \nclass=\"btn-attachments attachments\" title=\"Help on Attachments\"><span class=\"fi-paperclip\"></span></a><a href=\"http://docs.couchdb.org/en/latest/couchapp/ddocs.html#view-functions\" target=\"_blank\" \nclass=\"btn-views views\"  title=\"Help on Views\"><span class=\"fi-list-thumbnails\"></span></a><a href=\"http://docs.couchdb.org/en/latest/couchapp/ddocs.html#filter-functions\" target=\"_blank\" \nclass=\"btn-filters filters\"  title=\"Help on Filters\"><span class=\"fi-filter\"></span></a><a href=\"http://docs.couchdb.org/en/latest/couchapp/ddocs.html#update-functions\" target=\"_blank\" \nclass=\"btn-updates updates\" title=\"Help on Updates\"><span class=\"fi-save\"></span></a><a href=\"http://docs.couchdb.org/en/latest/couchapp/ddocs.html#list-functions\" target=\"_blank\" \nclass=\"btn-lists lists\"  title=\"Help on Lists\"><span class=\"fi-page-edit\"></span></a><a href=\"http://docs.couchdb.org/en/latest/couchapp/ddocs.html#show-functions\" target=\"_blank\" \nclass=\"btn-shows shows\"  title=\"Help on Shows\"><span class=\"fi-magnifying-glass\"></span></a><a href=\"http://docs.couchdb.org/en/latest/api/ddoc/rewrites.html\" target=\"_blank\" \nclass=\"btn-rewrites rewrites\"  title=\"Help on Rewrites\"><span class=\"fi-arrow-right\"></span></a><div \nclass=\"ikey\"></div><div \nclass=\"ikey\"></div><div\nclass=\"ivalue\"></div></div><div class=\"iact buttons\"><!--<button \nclass=\"btn-insert button green\">&thinsp;&thinsp;<span class=\"fi-indent-more\"></span>&thinsp;</button>--><button \nclass=\"btn-collapse button green\">&thinsp;<span class=\"fi-minus\"></span>&thinsp;</button><button \nclass=\"btn-copy button\"  title=\"Stash property as clip\"><span class=\"fi-bookmark\"></span></button><button \nclass=\"btn-del button red\"  title=\"Del property\">&thinsp;<span class=\"fi-x\"></span>&thinsp;</button></div>"
+	},
+	"MakeList": "function (data, key, state){\n\t\n\t// Object/array processor,\n\t// generates typed metaobject\n\t\n\tvar that=this,\n\t\t\tdt, a=[], man, bin, \n\t\t\thash, b = data.value;\n\tfor (var i in b) {\n\t\tdt = $.type(b[i]);\n\t\t\n\t\t// Detect multy\n\t\tman = /^(ob|ar)/.test(dt)?\"multi\":dt;\n\t\t\n\t\t// Detect string-derived types\n\t\tif (dt===\"string\"){\n\t\t\tif (/^function\\s?\\([^\\)]*\\)\\s*\\{[\\s\\S]*\\}$/.test(b[i])) {\n\t\t\t\tman = \"function\";\n\t\t\t}\n\t\t\telse if(b[i].length>160 && /^[a-zA-Z0-9\\+\\/]+={0,2}$/.test(b[i])) {\n\t\t\t\ttry {\n\t\t\t\t\tbin = atob(b[i]);\n\t\t\t\t\thash = $.my.f.sdbmCode(b[i]);\n\t\t\t\t\tman = \"base64\";\n\t\t\t\t}catch(e){}\n\t\t\t}\n\t\t}\n\t\t\n\t\t// Do we have viewstate stashed?\n\t\tvar vs = that.data.viewstate,\n\t\t\t\tpath = data.path.slice(0).add(data.key),\n\t\t\t\tvkey = path.join('❀')+'❀'+i;\n\t\t\n\t\ta.push({\n\t\t\tstate:state?state:(vs && vs[vkey]?vs[vkey]:1),\n\t\t\tlevel:data.level+1,\n\t\t\tmanifest:\"$\"+man,\n\t\t\tpath:path,\n\t\t\ttype:dt,\n\t\t\tkey:i,\n\t\t\tid:i,\n\t\t\tvalue:b[i],\n\t\t\tbin:bin,\n\t\t\thash:hash\n\t\t})\n\t}\n\treturn a;\n\t\t}",
+	"$multi": {
+		"id": "Sys.JSON.Object",
+		"inherit": ["Root"],
+		"data": {
+		},
+		"List": [],
+		"Txt": {
+			"object": ["Object {",
+				"}"],
+			"array": ["Array [",
+				"]"]
+		},
+		"init": "function ($o, form){\n\t\tvar that = this,ddoc=$o.parents(\".my-form\").last().my(\"data\").app||{}, d = form.data;\n\t\t$o.html(that.Root().HTML.ItemComplex)\n\t\t\n\t\tif (d.state>1) that.List = that.Root().MakeList(d);\n\t\t\n\t\tif (d.path[1]&&d.path[1]==\"_attachments\"&&window.depthOf(d.value)<=1)$o.find('>.inav .attachments,>.buttons .attachments').css({display:'inline-block'});\n$o.find(\".ilist:eq(0)\").on(\"change.my\", function(){\n\t\t\tthat.Root().Rejoin(d, that.List);\n\t\t}.debounce(300));\n\t\t\n\t\t$o.on(\"click.my\", \".ilist:eq(0) .btn-del\", function(evt){\n\t\t\tevt.stopPropagation();\n\t\t\tvar $f = $(this).parents(\".my-form\").eq(0);\t\t\n\t\t\tvar p = $f.parent().data(\"my\").data,\n\t\t\t\t\tt = $.type(p.value),\n\t\t\t\t\tkey = $f.my(\"data\").key;\n\t\t\t\n\t\t\tif (t==\"object\") delete p.value[key];\n\t\t\telse if (t==\"array\") p.value.removeAt(key);\n\t\t\t\n\t\t\tthat.Root().Lib.relist($o, that, form);\n\t\t});\n\t\t\n\t\n\n\n$o.find(\"a.green\").attr(\"href\",[ddoc.title||\"\",ddoc.doc?ddoc.doc._id:\"\"].insert((d.path||[]).slice(2)).insert(d.key||\"\").join(\"/\"));if(d.path&&d.path.length>1&&d.path[1]&&d.path[1]==\"_attachments\"&&window.depthOf(d.value)<=1)$o.find('>.inav .attachments,>.buttons .attachments').css({display:'inline-block'});}",
+		"ShowItems": null,
+		"ui": {
+			".ikey:eq(0)": {
+				"bind": "function (d,v){return this.Root().Lib.keybind(d,v)}",
+				"css": {
+					"bold": "function (d){return d.state!=1}"
+				},
+				"watch": [".idesc:eq(0)"]
+			},
+			".idesc:eq(0)": {
+				"bind": "function (d,v,$o) {\n\t\t\t\tvar that = this,\n\t\t\t\t\t\tlist = this.List, \n\t\t\t\t\t\tt = that.Txt[d.type],\n\t\t\t\t\t\tds = Object.size(d.value),\n\t\t\t\t\t\th=\"\";\n\t\t\t\tif (v!=null) {\n\t\t\t\t\td.state = (d.state==1 || !d.level?2:1);\n\t\t\t\t\tif (d.state==2) that.List = that.Root().MakeList(d);\n\t\t\t\t\telse {\n\t\t\t\t\t\tthat.List = [];\n\t\t\t\t\t\tthat.ShowItems = null;\n\t\t\t\t\t}\n\t\t\t\t\tthat.Root().MemState(d);\n\t\t\t\t}\n\t\t\t\tif (that.ShowItems === null && ds<5){\n\t\t\t\t\tvar t2 = JSON.stringify(d.value).escapeHTML();\n\t\t\t\t\tif (t2.length<80) that.ShowItems = t2;\n\t\t\t\t\telse that.ShowItems = false;\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\tif (d.state==1 && that.ShowItems) {\n\t\t\t\t\th = that.ShowItems +(ds?\" ▸\":\"\");\n\t\t\t\t} else {\n\t\t\t\t\th= t[0]+ds+t[1] +\" \"\n\t\t\t\t\t+(!ds || !d.level?\"\":!that.List.length?\"▸\":\"▾\");\n\t\t\t\t}\n\t\t\t\t\n\t\t\t\treturn h;\n\t\t\t}",
+				"css": {
+					"gray": "function (){return true}"
+				},
+				"events": "click.my"
+			},
+			".ilist:eq(0)": {
+				"delay": 30,
+				"check": false,
+				"bind": "this.List",
+				"list": ">div.irow",
+				"manifest": "function (e) {\n\t\t\t\tvar that = this;\n\t\t\t\treturn that.Root()[e.manifest]||that.Root().$string;\n\t\t\t}",
+				"watch": [".idesc:eq(0)"]
+			},
+			".ivalue:eq(0)": {
+				"css": {
+					"hide": "function (){return !this.List.length}"
+				},
+				"watch": [".idesc:eq(0)"]
+			}
+		},
+		"style":{
+		  "": "function ($o, form) { if (form.data.key==\"_attachments\"){return {\">.inav a.btn-attachments\":\"display:inline-block;\"}//\" .btn-add\":\"display:none\",\n};\n if (form.data.key==\"views\") return {\" .views\":\"display:inline-block;\"};\n if (form.data.key==\"lists\") return {\" .lists\":\"display:inline-block;\"};\n if (form.data.key==\"filters\") return {\" .filters\":\"display:inline-block;\"};\n if (form.data.key==\"shows\") return {\" .shows\":\"display:inline-block;\"};\n if (form.data.key==\"updates\") return {\" .updates\":\"display:inline-block;\"};\n if (form.data.key==\"rewrites\") return {\" .rewrites\":\"display:inline-block;\"};}"
+		}
+	},
+	"$string": {
+		"id": "Sys.JSON.String",
+		"inherit": ["Root"],
+		"init": "function ($o, form){\n\t\tvar that = this;\n\t\t$o.html(that.Root().HTML.ItemSimple);\n\t}",
+		"ui": {
+			".ikey:eq(0)": "function (d,v){return this.Root().Lib.keybind(d,v)}",
+			".ivalue:eq(0)": {
+				"init": "function ($o, form){\n\t\t\t\t$o.on(\"click.my\", function(){\n\t\t\t\t\tvar $n = $o.my(\"find\",\".inav\");\n\t\t\t\t\tif (!$n.hasClass(\"iseditor\")) {\n\t\t\t\t\t\tform.data.state = 2;\n\t\t\t\t\t\t$n.addClass(\"iseditor\");\n\t\t\t\t\t\t$o.attr(\"contenteditable\",true).attr('spellcheck', false);\n\t\t\t\t\t\t$o.text(form.data.value).focus();\n\t\t\t\t\t}\n\t\t\t\t})\n\t\t\t\t.on(\"blur.my\", function(){\n\t\t\t\t\tvar txt=$o.text()||\"\",$n = $o.my(\"find\",\".inav\");\n\t\t\t\t\tif ($n.hasClass(\"iseditor\")&&txt.split(\"\\n\").length<=1) {\n\t\t\t\t\t\tform.data.state = 1;\n\t\t\t\t\t\tform.data.value = $o.text().toString();\n\t\t\t\t\t\t$n.removeClass(\"iseditor\");\n\t\t\t\t\t\t$o.attr(\"contenteditable\",false);\n\t\t\t\t\t\t$o.text('\"'+form.data.value.to(140)).trigger(\"check\");\n\t\t\t\t\t\t\n\t\t\t\t\t}\n\t\t\t\t})\n\t\t\t}",
+				"bind": "function (d, v){\n\t\t\t\tif (d.state==1) {\n\t\t\t\t\tvar h='\"';\n\t\t\t\t\tif (d.value.length>140) {\n\t\t\t\t\t\th+=d.value.truncate(140).escapeHTML()\n\t\t\t\t\t\t+'\" <span class=\"ilabel\">'+d.value.length+' chars</span>';\n\t\t\t\t\t}\n\t\t\t\t\telse h+=d.value.escapeHTML()+'\"';\n\t\t\t\t\treturn h;\n\t\t\t\t}\n\t\t\t\telse {\n\t\t\t\t\tif (v!=null) d.value = v;\n\t\t\t\t\treturn d.value;\n\t\t\t\t}\n\t\t\t}",
+				"events": "input.my,check.my"
+			}
+		},
+		"style":{
+		  " .inav": "function ($o, form) { if (form.data.key==\"contact\") return {\" .ikey\":\"font-style:italic;\"};}"
+		}
+	},
+	"$base64": {
+		"id": "Sys.JSON.Base64",
+		"inherit": ["Root"],
+		"init": "function ($o, form){\n\t\tvar sig, that = this, \n\t\t\t\td = form.data;\n\t\t$o.html(that.Root().HTML.ItemSimple);\n\t\t\n\t\tif (!d.sig) {\n\t\t\td.sig = sig = atob(d.value.to(40));\n\t\t\t\n\t\t\td.size = (d.value.length/4*3).floor();\n\n\t\t\tif (sig.to(4)===\"ÿØÿà\") { \n\t\t\t\td.mime =  'image/jpeg'; \n\t\t\t}\n\t\t\telse if (sig.to(4)===\"\\u0089PNG\") { \n\t\t\t\td.mime = 'image/png'; \n\t\t\t}\n\t\t\t\n\t\t\tif (d.mime) {\n\t\t\t\t// we have mime so its an image\n\t\t\t} else {\n\t\t\t\t// try to guess it by name\n\t\t\t\tif (d.path.length==3 && d.path[1]==\"_attachments\") {\n\t\t\t\t\t// we have couchdb doc\n\t\t\t\t\tvar i, ico=\"fi-paperclip\", mime=\"application/octet-stream\", fname = d.path[2];\n\t\t\t\t\tfor (i in that.Mime) if (that.Mime[i].test(fname)) mime = i;\n\t\t\t\t\tfor (i in that.Ico) if (that.Ico[i].test(fname)) ico = i;\n\t\t\t\t\td.mime = mime;\n\t\t\t\t\td.ico = ico;\n\t\t\t\t\td.fname = fname;\n\t\t\t\t}\n\t\t\t}\n\t\t\t\n\t\t\tthat.Root().Blobs[d.hash] = URL.createObjectURL($.my.f.base642blob(d.value, null, d.mime));\n\t\t}\n\n\t}",
+		"ui": {
+			".ikey:eq(0)": "function (d,v){return this.Root().Lib.keybind(d,v)}",
+			".ivalue:eq(0)": {
+				"init": "function ($o, form){\n\t\t\t\t$o.on(\"click.my\", \".base64string\", function(evt){\n\t\t\t\t\tif ($(evt.target).is(\"a\")) return true;\n\t\t\t\t\tvar $n = $o.my(\"find\",\".inav\");\n\t\t\t\t\tif (!$n.hasClass(\"iseditor\")) {\n\t\t\t\t\t\tform.data.state = 2;\n\t\t\t\t\t\t$n.addClass(\"iseditor\");\n\t\t\t\t\t\t$o.attr(\"contenteditable\",true).attr('spellcheck', false);\n\t\t\t\t\t\t$o.text(atob(form.data.value)).focus();\n\t\t\t\t\t}\n\t\t\t\t})\n\t\t\t\t.on(\"blur.my\", function(){\n\t\t\t\t\tvar $n = $o.my(\"find\",\".inav\");\n\t\t\t\t\tif ($n.hasClass(\"iseditor\")) {\n\t\t\t\t\t\tform.data.state = 1;\n\t\t\t\t\t\tform.data.value = btoa($o.text());\n\t\t\t\t\t\t$n.removeClass(\"iseditor\");\n\t\t\t\t\t\t$o.attr(\"contenteditable\",false);\n\t\t\t\t\t\t$o.text('\"'+form.data.value.to(140)).trigger(\"check\");\n\t\t\t\t\t\t\n\t\t\t\t\t}\n\t\t\t\t})\n\t\t\t}",
+				"bind": "function (d, v, $o){\n\t\t\t\tvar h=\"\", \n\t\t\t\t\t\timg = /^image/.test(d.mime+\"\") && d.value.length < 5e5?this.Root().Blobs[d.hash]:null;\n\t\t\t\tif (d.state==1) {\n\t\t\t\t\t\n\t\t\t\t\tvar w = $o.width();\n\t\t\t\t\t\n\t\t\t\t\tif (img) {\n\t\t\t\t\t\th+='<a href=\"'+img+'\" target=\"_blank\" class=\"base64image\"><img src=\"'+img+'\" '\n\t\t\t\t\t\t+'class=\"fl mr10\"/></a>';\n\t\t\t\t\t\tw=w-80;\n\t\t\t\t\t} else if (d.mime && d.ico && d.fname){\n\t\t\t\t\t\th+='<a href=\"'+this.Root().Blobs[d.hash]+'\" '\n\t\t\t\t\t\t\t+' class=\"base64ico w55 h55 tac dib vat mr10 lgray fs200 bg-lgray br2\" '\n\t\t\t\t\t\t\t+ 'download=\"'+d.fname+'\" '\n\t\t\t\t\t\t\t+' title=\"Download '+d.fname+'\" '\n\t\t\t\t\t\t+' style=\"line-height:55px\"><span class=\"'+d.ico+'\"></span></a>';\n\t\t\t\t\t\tw=w-80;\n\t\t\t\t\t}\n\t\t\t\t\t\n\t\t\t\t\tvar trim = ((w/10*2.5)|0).clamp(140,600);\n\t\t\t\t\t\n\t\t\t\t\th+='<div class=\"dib vat base64string\">';\n\t\t\t\t\th+='\"';\n\t\t\t\t\tif (d.value.length>trim) {\n\t\t\t\t\t\th+=d.value.truncate(trim)\n\t\t\t\t\t\t+'\"&nbsp;<a href=\"'+this.Root().Blobs[d.hash]+'\" '\n\t\t\t\t\t\t+'target=\"_blank\" class=\"ilabel tdn\">'\n\t\t\t\t\t\t+(d.mime?'Open':'Download')\n\t\t\t\t\t\t+'&nbsp;'+d.size.metric(2)+'b</a>';\n\t\t\t\t\t}\n\t\t\t\t\telse h+=d.value+'\"';\n\t\t\t\t\tif (img) h+='</div>';\n\t\t\t\t\treturn h;\n\t\t\t\t}\n\t\t\t\telse {\n\t\t\t\t\tif (v!=null) d.value = v;\n\t\t\t\t\treturn d.value;\n\t\t\t\t}\n\t\t\t}",
+				"events": "input.my"
+			}
+		},
+		"Mime": {
+			"application/x-compressed": "new RegExp(/\\.zip$/i)",
+			"application/vnd.ms-excel": "new RegExp(/\\.xlsx?$/i)",
+			"application/octet-stream": "new RegExp(/\\.(cdr|dat|rar)$/i)",
+			"application/json": "new RegExp(/\\.(jsn|json)$/i)",
+			"application/javascript": "new RegExp(/\\.js$/i)",
+			"application/vnd.openxmlformats-officedocument.wordprocessingml.document": "new RegExp(/\\.docx$/i)",
+			"application/msword": "new RegExp(/\\.doc?$/i)",
+			"application/pdf": "new RegExp(/\\.pdf$/i)",
+			"text/plain": "new RegExp(/\\.txt$/i)",
+			"text/html": "new RegExp(/\\.([x]?htm[l]?)$/i)",
+			"text/xml": "new RegExp(/\\.(xml|xsd|xsf|xsl|xslt)$/i)",
+			"image/png": "new RegExp(/\\.png$/i)",
+			"image/jpeg": "new RegExp(/\\.jpe?g$/i)",
+			"image/gif": "new RegExp(/\\.gif$/i)"
+		},
+		"Ico": {
+			"fi-photo": "new RegExp(/\\.(png|jp[e]?g|gif|tif[f]?|bmp)$/i)",
+			"fi-social-adobe": "new RegExp(/\\.(pdf|ai|psd)$/i)",
+			"fi-page-doc": "new RegExp(/\\.(doc[x]?|txt|rtf)$/i)",
+			"fi-graph-pie": "new RegExp(/\\.(xls[x]?|csv)$/i)",
+			"fi-archive": "new RegExp(/\\.(zip|rar|7z|7zip)$/i)",
+			"fi-html5 pl2": "new RegExp(/\\.(htm[l]|php)$/i)",
+			"fi-css3 pl2": "new RegExp(/\\.css$/i)",
+			"fi-widget": "new RegExp(/\\.(js[on]?|php|asp|jar|c|erl)$/i)",
+			"fi-sound": "new RegExp(/\\.(wav|aiff|mp3|ogg|mpeg3)$/i)"
+		}
+	},
+	"$function": {
+		"id": "Sys.JSON.Function",
+		"inherit": ["Root"],
+		"init": "function ($o, form){\n\t\tvar that = this;\n\t\t$o.html(that.Root().HTML.ItemSimple);\n\t}",
+		"ui": {
+			".ikey:eq(0)": "function (d,v){return this.Root().Lib.keybind(d,v)}",
+			".ivalue:eq(0)": {
+				"init": "function ($o, form){\n\t\t\t\t$o.on(\"click.my\", function(){\n\t\t\t\t\tvar $n = $o.my(\"find\",\".inav\");\n\t\t\t\t\tif (!$n.hasClass(\"iseditor\")) {\n\t\t\t\t\t\tform.data.state = 2;\n\t\t\t\t\t\t$n.addClass(\"iseditor\");\n\t\t\t\t\t\t$o.attr(\"contenteditable\",true).attr('spellcheck', false);\n\t\t\t\t\t\t$o.text(form.data.value).focus();\n\t\t\t\t\t}\n\t\t\t\t})\n\t\t\t\t.on(\"asd.my\", function(){\n\t\t\t\t\tvar $n = $o.my(\"find\",\".inav\");\n\t\t\t\t\tif ($n.hasClass(\"iseditor\")) {\n\t\t\t\t\t\tform.data.state = 1;\n\t\t\t\t\t\tform.data.value = $o.text().toString();\n\t\t\t\t\t\t$o.attr(\"contenteditable\",false);\n\t\t\t\t\t\t$n.removeClass(\"iseditor\");\n\t\t\t\t\t\t$o.text(form.data.value.to(50)).trigger(\"check\");\n\t\t\t\t\t}\n\t\t\t\t})\n\t\t\t}",
+				"bind": "function (d, v){\n\t\t\t\tif (d.state==1) {\n\t\t\t\t\tvar h='';\n\t\t\t\t\tif (d.value.length>100) {\n\t\t\t\t\t\th+='<span class=\"blue \">function</span> ('\n\t\t\t\t\t\t\t+d.value.split(\")\",1)[0].split('(')[1]+') {'\n\t\t\t\t\t\t+' <span class=\"ilabel\">'\n\t\t\t\t\t\t\t+ ((d.value.match(/[\\r\\n]+/g)||\"\").length+1)+' SLOC, '\n\t\t\t\t\t\t\t+d.value.length+' chars'\n\t\t\t\t\t\t+'</span> '\n\t\t\t\t\t\t+'}';\n\t\t\t\t\t}\n\t\t\t\t\telse h = d.value.escapeHTML();\n\t\t\t\t\t\n\t\t\t\t\treturn h;\n\t\t\t\t}\n\t\t\t\telse {\n\t\t\t\t\tif (v!=null) d.value = v;\n\t\t\t\t\treturn d.value;\n\t\t\t\t}\n\t\t\t}",
+				"events": "input.my",
+				"css": {
+					"xgray": "function (){return true}"
+				}
+			}
+		}		
+	},
+	"$number": {
+		"id": "Sys.JSON.Number",
+		"inherit": ["Root"],
+		"init": "function ($o, form){\n\t\tvar that = this;\n\t\t$o.html(that.Root().HTML.ItemSimple);\n\t}",
+		"N2S": "function (v){\n\t\tvar h = '<span class=\"orange\">'+v.toString()+'</span>';\n\t\tif (v<1e13&&v>8e11&&v===(+v).floor()) {\n\t\t\th+=' <span class=\"ilabel xgray\"><span class=\"fi-clock\"></span> '\n\t\t\t+Date.create(v).format('{d} {Mon} {yyyy}, {h}:{mm}:{ss}, Local')\n\t\t\t+'</span>';\n\t\t}\n\t\treturn h;\n\t}",
+		"ui": {
+			".ikey:eq(0)": "function (d,v){return this.Root().Lib.keybind(d,v)}",
+			".ivalue:eq(0)": {
+				"init": "function ($o, form){\n\t\t\t\t$o.on(\"click.my\", function(){\n\t\t\t\t\tvar $n = $o.my(\"find\",\".inav\");\n\t\t\t\t\tif (!$n.hasClass(\"iseditor\")) {\t\t\t\t\t\t\n\t\t\t\t\t\tform.data.state = 2;\n\t\t\t\t\t\t$n.addClass(\"iseditor\");\n\t\t\t\t\t\t$o.attr(\"contenteditable\",true).attr('spellcheck', false);\n\t\t\t\t\t\t$o.text(form.data.value).focus();\n\t\t\t\t\t}\n\t\t\t\t})\n\t\t\t\t.on(\"blur.my\", function(){\n\t\t\t\t\tvar $n = $o.my(\"find\",\".inav\");\n\t\t\t\t\tif ($n.hasClass(\"iseditor\")) {\n\t\t\t\t\t\tform.data.state = 1;\n\t\t\t\t\t\tform.data.value = +$o.text().toString();\n\t\t\t\t\t\t$n.removeClass(\"iseditor\");\n\t\t\t\t\t\t$o.attr(\"contenteditable\",false);\n\t\t\t\t\t\t$o.trigger(\"check\")\n\t\t\t\t\t}\n\t\t\t\t})\n\t\t\t}",
+				"bind": "function (d, v){\n\t\t\t\tif (d.state==1) return this.N2S(d.value);\n\t\t\t\telse {\n\t\t\t\t\tif (v!=null) d.value = isNaN(v)?d.value:+v;\n\t\t\t\t\treturn v;\n\t\t\t\t}\n\t\t\t}",
+				"events": "input.my"
+			}
+		}
+	},
+	"$boolean": {
+		"id": "Sys.JSON.Boolean",
+		"inherit": ["Root"],
+		"init": "function ($o, form){\n\t\tvar that = this;\n\t\t$o.html(that.Root().HTML.ItemSimple);\n\t}",
+		"ui": {
+			".ikey:eq(0)": "function (d,v){return this.Root().Lib.keybind(d,v)}",
+			".ivalue:eq(0)": {
+				"init": "function ($o, form){\n\t\t\t\t$o.tags({\n\t\t\t\t\ttags:[\"true\"],\n\t\t\t\t\tempty:\"false\",\n\t\t\t\t\ttagcss:\"tag gray cp br100 pl10 pr10\",\n\t\t\t\t\tgroupshim:\"\"\n\t\t\t\t})\n\t\t\t}",
+				"bind": "function (d, v){\n\t\t\t\tif (v!=null) d.value = !!v.length;\n\t\t\t\treturn d.value?[\"true\"]:[]\n\t\t\t}"
+			}
+		}
+	},
+	"$null": {
+		"id": "Sys.JSON.Null",
+		"inherit": ["Root"],
+		"init": "function ($o, form){\n\t\tvar that = this;\n\t\t$o.html(that.Root().HTML.ItemSimple);\n\t}",
+		"ui": {
+			".ikey:eq(0)": "function (d,v){return this.Root().Lib.keybind(d,v)}",
+			".ivalue:eq(0)": {
+				"bind": "function (d, v){\n\t\t\t\treturn '<span class=\"red o80\">null</span>';\n\t\t\t}"
+			}
+		}
+	},
+	"Rejoin": "function (d, list) {\n\tfor (var r, i=0;i<list.length;i++) {\n\t\tr=list[i];\n\t\tif (!/^(ob|ar)/.test(r.type)) d.value[r.key] = r.value;\n\t}\n\t\t}",
+	"Event": {
+	    "filters-menu": "function (evt, data, that, $o) { $(this).siblings('.btn-add').trigger('click.my');}",
+	    "updates-menu": "function (evt, data, that, $o) {}",
+	    "views-menu": "function (evt, data, that, $o) {}",
+	    "lists-menu": "function (evt, data, that, $o) {}",
+	    "shows-menu": "function (evt, data, that, $o) {}",
+	    "rewrites-menu": "function (evt, data, that, $o) {}",
+	    "open": "function (evt, data, that, $o) {\n\tevt.stopPropagation();\n\tvar $b = $(this),\n\t\t\t$f = $b.parents(\".my-form\").eq(0),\n\t\t\tp = $f.data(\"my\").data;\n  var $o=$f.my(\"find\",\".ivalue\"),$n = $f.my(\"find\",\".inav\");\n\tif ($n.hasClass(\"iseditor\")) {\n\t\tvar txt=$o.text();\n//try{if (typeof eval(txt)==\"function\")txt=txt.toString();}catch(e){};\np.state = 1;\n\t\tp.value = txt;\n\t\t$o.attr(\"contenteditable\",false);\n\t\t$n.removeClass(\"iseditor\");\n\t\t$o.text(p.value.to(50)).trigger(\"check\");\n\t}\n}",
+	    "download": "function (evt, data, that, $o) {\n\tevt.stopPropagation();\n\tvar $b = $(this),\n\t\t\t$f = $b.parents(\".my-form\").eq(0),\n\t\t\tp = $f.data(\"my\").data,app=$b.parents(\".my-form\").last().my(\"data\").app||{},url=[app.title||\"\",app&&app.doc?app.doc._id:\"\"].insert(p.path.slice(2)).insert(p.key).join(\"/\"),\n\t\t\tmn = $f.data(\"my\").manifest;$f.my('data',{state:1});$f.my('find','.idesc:eq(0)').trigger('click.my');window.downloadAttachment(url).then(function(res){\n$f.find('.ivalue .btn-del').trigger(\"click.my\");$f.my(\"data\",{value:res});$f.my('data',{state:1});$f.my('find','.idesc:eq(0)').trigger('click.my');\n\t\t\t});}",
+	    "collapse": "function (evt, data, that, $o) {\n\tevt.stopPropagation();\n\tvar $b = $(this),\n\t\t\t$f = $b.parents(\".my-form\").eq(0),\n\t\t\tp = $f.data(\"my\").data;\n  var $o=$f.my(\"find\",\".ivalue\"),$n = $f.my(\"find\",\".inav\");\n\tif ($n.hasClass(\"iseditor\")) {\n\t\tvar txt=$o.text();\n//try{if (typeof eval(txt)==\"function\")txt=txt.toString();}catch(e){};\np.state = 1;\n\t\tp.value = txt;\n\t\t$o.attr(\"contenteditable\",false);\n\t\t$n.removeClass(\"iseditor\");\n\t\t$o.text(p.value.to(50)).trigger(\"check\");\n\t}\n}",
+		"add": "function (evt, data, that, $o){\n\tevt.stopPropagation();\n\tvar $b = $(this),\n\t\t\t$f = $b.parents(\".my-form\").eq(0);\t\t\n\tvar $p = $b,\n\t\t\tp = $f.data(\"my\").data,\n\t\t\tmn = $f.data(\"my\").manifest,\n\t\t\tt = $.type(p.value),\n\t\t\tisa = t==\"array\",\n\t\t\tkey = $f.my(\"data\").key,\n\t\t\tclip = that.Ls(\"Clip\")||{type:\"\"},\n\t\t\tsample = {\n\t\t\t\tobject:{},\n\t\t\t\tarray:[],\n\t\t\t\tstring:\"\",\n\t\t\t\tboolean:true,\n\t\t\t\tnumber:0\n\t\t\t};\n\t$b.parent().addClass(\"hover\");\n\t$f.addClass(\"hover\");\n\t$(this).modal({\n\t\tmanifest:that.MAdd,\n\t\tdata:{\n\t\t\ttext:'New '+(isa?'member':'property')+' in <b>'+p.key+':'+(isa?'[]':'{}')+'</b>',\n\t\t\tprepend:(isa?'Insert':'Prepend'),\n\t\t\tappend:(isa?'':'Append'),\n\t\t\tisarray:isa,\n\t\t\tkey:isa?\"0\":'',\n\t\t\tclip:clip,\n\t\t\tkeys:isa?{}:Object.keys(p.value).reduce(function(a,b){a[b]=true;return a;},{}),\n\t\t},\n\t\twidth:300,\n\t\talign:\"top:100%\",\n\t\troot:$o,\n\t\tbound:10,\n\t\tnose:\"top\",\n\t\tscreen:\"rgba(255,255,255,0)\",\n\t\tclose:false,\n\t\tesc:true,\n\t\tenter:true\n\t})\n\t.then(function(data){\n\t\tvar i, cmd = data.cmd,\n\t\t\t\tredraw = true, \n\t\t\t\tkeys=[], vals=[];\n\t\t\n\t\tif (data.clip.type && data.type==\"clip\") sample.clip = data.clip.value; \n\t\t\n\t\t// Object\n\t\tif (/^(ob)/.test(t)) {\n\t\t\t\n\t\t\t// Append/replace is simple\n\t\t\tif (cmd==\"append\" || p.value[data.key]!=null) { \n\t\t\t\tp.value[data.key] = Object.clone(sample[data.type],true); \n\t\t\t}\n\t\t\t\n\t\t\t// Prepend is more complex\n\t\t\telse if (cmd==\"prepend\") {\n\t\t\t\t\n\t\t\t\tkeys = Object.keys(p.value);\n\t\t\t\tfor (i in keys) {\n\t\t\t\t\tvals.push(p.value[keys[i]]);\n\t\t\t\t\tdelete p.value[keys[i]];\n\t\t\t\t}\n\t\t\t\tp.value[data.key] = Object.clone(sample[data.type],true);\n\t\t\t\tfor (i in keys) {\n\t\t\t\t\tif (keys[i]!==data.key) p.value[keys[i]] = vals[i];\n\t\t\t\t}\n\t\t\t\tvals=keys=null;\n\t\t\t}\n\t\t\t//Unknown cmd\n\t\t\telse redraw = false;\n\t\t}\n\t\t\n\t\t// Array\n\t\telse if (isa) {\n\t\t\tp.value.insert(Object.clone(sample[data.type],true),data.key);\n\t\t}\n\t\telse redraw = false;\n\t\t\n\t\tif (redraw) {\n\t\t\t// force redraw\n\t\t\tmn.ShowItems = null;\n\t\t\tmn.List = that.MakeList(p);\n\t\t\tp.state=2;\n\t\t\t$f.find(\".idesc:eq(0)\").trigger(\"check\");\n\t\t\t$f.find(\".ilist:eq(0)\").trigger(\"recalc\");\n\t\t}\n\t})\n\t.always(function(){\n\t\t$b.parent().removeClass(\"hover\");\n\t\t$f.removeClass(\"hover\");\n\t});\n\t\t\t}",
+		"takeout": "function (evt, data, that, $o){\n\tevt.stopPropagation();\n\tvar $b = $(this),\n\t\t\t$f = $b.parents(\".my-form\").eq(0),\n\t\t\tp = $f.data(\"my\").data,\n\t\t\tmn = $f.data(\"my\").manifest;\n\t$b.parent().addClass(\"hover\");\n\t$f.addClass(\"hover\");\n\t$b.modal({\n\t\tmanifest:that.MTakeout,\n\t\tdata:{\n\t\t\tjson:JSON.stringify(JSON.parse(JSON.stringify_stable(p.value)),null,'  '),\n\t\t\tpath:p.path,\n\t\t\tkey:p.key,\n\t\t\treplace:Object.size(p.value)?\"Replace\":\"Save\",\n\t\t\textend:Object.size(p.value)?\"Extend\":\"\"\n\t\t},\n\t\twidth:800,\n\t\talign:\"top:-3px\",\n\t\troot:$o,\n\t\tbound:0,\n\t\tnose:\"\",\n\t\tscreen:\"rgba(255,255,255,0)\",\n\t\tclose:true,\n\t\tesc:true,\n\t\tenter:true\n\t})\n\t.then(function(res){\n\t\tvar redraw = true;\n\t\tif (res.cmd==\"extend\") $.extend(!0, p.value, res.node);\n\t\telse if (res.cmd==\"replace\") {\n\t\t\tthat.Root().Lib.kick(p.value, res.node);\n\t\t}\n\t\telse redraw = false;\n\t\t\n\t\tif (redraw) {\n\t\t\t// force redraw\n\t\t\tmn.ShowItems = null;\n\t\t\tp.state=2;\n\t\t\t\n\t\t\tthat.Root().Lib.relist($f, mn);\n\t\t\t/*mn.List = that.Root().MakeList(p);\n\t\t\t$f.find(\".idesc:eq(0)\").trigger(\"check\");\n\t\t\t$f.find(\".ilist:eq(0)\").trigger(\"recalc\");*/\n\t\t}\n\t\t\n\t})\n\t.always(function(){\n\t\t$b.parent().removeClass(\"hover\");\n\t\t$f.removeClass(\"hover\");\n\t});\n\t\t\t}",
+		"copy": "function (evt, data, that, $o){\n\tevt.stopPropagation();\n\tvar $b = $(this),\n\t\t\t$f = $b.parents(\".my-form\").eq(0),\n\t\t\tp = $f.data(\"my\").data,\n\t\t\tt = $.type(p.value),\n\t\t\tobj={};\n\t\n\tif (!p.level) obj = {key:\"\",type:p.type,value:p.value}\n\telse {\n\t\tobj={key:p.key,type:p.type,value:p.value}\n\t}\n\tthat.Ls(\"Clip\", obj);\n\tif (cw.lib) cw.lib.note(\"Clip stashed\",\"ok\");\n\t\t\t}"
+	},
+	"MTakeout": {
+		"init": "function ($o, form){\n\t\tvar that = this;\n\t\tthat.StartHash = $.my.f.sdbmCode(form.data.json);\n\t\t$o.formgen([\n\t\t\t'<div id=\"title\"></div>',\n\t\t\t'<div style=\"border:1px solid #ddd; margin:2px 0 10px 0;border-radius:2px\">',\n\t\t\t'<textarea id=\"json\"></textarea>',\n\t\t\t'</div>',\n\t\t\t'<div>',\n\t\t\t'<div class=\"fr gray pt5\" id=\"info\"></div>',\n\t\t\t'<div class=\"buttons dib vat fs110\">',\n\t\t\t'<input type=\"file\" class=\"fileupload\" style=\"display:none\" />',\n\t\t\t'<button class=\"button \" id=\"btn-zip\">Upload(also Zip)</button>',\n\t\t\t'<button class=\"button \" id=\"btn-replace\">Replace</button>',\n\t\t\t'<button class=\"button \" id=\"btn-extend\">Extend</button>',\n\t\t\t'<button class=\"button\" id=\"btn-cancel\">Cancel</button>',\n\t\t\t'</div>',\n\t\t\t'<div class=\"lgray pl40 dib vat pt5\" id=\"info\">Copy or paste/edit JSON ⇡</div>',\n\t\t\t'</div>'\n\t\t]);\n\n\t}",
+		"ui": {
+			".fileupload": {
+				"init": "function ($o,form){\n\t\t\t\t$o.on('change',function(evt){window.uploadFile(evt.target.files,form).then(function(doc){$o.my().root.my('data',{json:JSON.stringify(doc,null,2)});});});}"
+			},					
+			"#title": "function (d,v,$o){\n\t\t\treturn \"JSON for \"+d.path.slice(0).add(d.key).join(\"/\").truncate(70,\"middle\",\"…\");\n\t\t}",
+			"#json": {
+				"delay": 20,
+				"bind": "json",
+				"init": "function ($o, form){\n\t\t\t\tCodeMirror.fromTextArea($o[0], {\n\t\t\t\t\tmode:\"javascript\",\n\t\t\t\t\tlineNumbers:true,\n\t\t\t\t\tindentWithTabs:!0,\n\t\t\t\t\tindentUnit:2,\n\t\t\t\t\ttabSize:2,\n\t\t\t\t\ttheme: \"default\",\n\t\t\t\t\tautofocus:true,\n\t\t\t\t\t//lineWrapping:true\n\t\t\t\t});\n\t\t\t}"
+			},
+			"#btn-zip": {
+				"bind": "function (d,v,$o){\n\t\t\t\tif (v!=null) $o.my().root.my('find','.fileupload').trigger('click');}"
+			},
+			"#btn-replace": {
+				"bind": "function (d,v,$o){\n\t\t\t\tif (v!=null) {\n\t\t\t\t\td.node = this.Parsed;\n\t\t\t\t\td.cmd = \"replace\";\n\t\t\t\t\t$o.trigger(\"commit\");\n\t\t\t\t}\n\t\t\t\treturn d.replace;\n\t\t\t}",
+				"css": {
+					":disabled": "function (d,v){return !this.Dirty || !this.Parsed;}",
+					"self:orange": "function (d,v){return this.Dirty && !!this.Parsed;}"
+				},
+				"watch": "#info"
+			},
+			"#btn-extend": {
+				"bind": "function (d,v,$o){\n\t\t\t\tif (v!=null) {\n\t\t\t\t\td.node = this.Parsed;\n\t\t\t\t\td.cmd = \"extend\";\n\t\t\t\t\t$o.trigger(\"commit\");\n\t\t\t\t}\n\t\t\t\treturn d.extend;\n\t\t\t}",
+				"css": {
+					":disabled": "function (d,v){return !this.Dirty || !this.Parsed;}",
+					"self:orange": "function (d,v){return this.Dirty && !!this.Parsed;}",
+					"self:hide": "function (d){ return !d.extend}"
+				},
+				"watch": "#info"
+			},
+			"#btn-cancel": {
+				"bind": "function (d,v,$o){\n\t\t\t\tif (v!=null) {\n\t\t\t\t\t$o.trigger(\"cancel\");\n\t\t\t\t}\n\t\t\t}"
+			},
+			"#info": {
+				"delay": 400,
+				"bind": "function (d,v,$o){\n\t\t\t\tvar parse, \n\t\t\t\t\t\ts = unescape(encodeURIComponent(d.json)).length;\n\t\t\t\ttry {\n\t\t\t\t\tparse = eval(\"(\"+d.json+\")\");\n\t\t\t\t\tif (!Object.isObject(parse) && !Object.isArray(parse)) parse=null;\n\t\t\t\t\telse {\n\t\t\t\t\t\tparse = JSON.parse($.my.tojson(parse));\n\t\t\t\t\t}\n\t\t\t\t}catch(e){\n\t\t\t\t\t//console.log(e)\n\t\t\t\t}\n\t\t\t\tthis.Parsed = parse?parse:null;\n\t\t\t\t\n\t\t\t\t$o.my().root.toggleClass(\"ed-error\",!parse);\n\n\t\t\t\tthis.Hash = $.my.f.sdbmCode(d.json);\n\t\t\t\tthis.Dirty = this.StartHash != this.Hash;\n\t\t\t\treturn s.metric(2)+\"b\";\n\t\t\t}",
+				"watch": "#json"
+			}
+		}
+	},
+	"MAdd": {
+		"init": "function ($o,form) {\n\t\tvar that=this;\n\t\t$o.formgen(that.HTML);\n\t\tif (form.data.isarray) {\n\t\t\t$o.find(\"#nkey\").attr(\"type\",\"number\");\n\t\t}\n\t}",
+		"data": {
+			"cmd": "",
+			"key": "",
+			"type": "string",
+			"isarray": false,
+			"text": "Create new property",
+			"prepend": "Prepend",
+			"append": "Append",
+			"keys": {
+			}
+		},
+		"ui": {
+			"#ntext": "text",
+			"#nkey": {
+				"bind": "function (d,v){\n\t\t\t\tif (v!=null) {\n\t\t\t\t\tif (d.isarray) d.key = v.replace(/\\D/g,'');\n\t\t\t\t\telse d.key = v;\n\t\t\t\t}\n\t\t\t\treturn d.key;\n\t\t\t}",
+				"watch": "#ntype"
+			},
+			"#ntype": {
+				"bind": "function (d,v,$o){\n\t\t\t\tif (v!=null) {\n\t\t\t\t\td.type=v;\n\t\t\t\t\tif (v==\"Clip\" && !d.key && !d.isarray) d.key = d.clip.key; \n\t\t\t\t}\n\t\t\t\treturn d.type;\n\t\t\t}",
+				"init": "function ($o,form){\n\t\t\t\t$o.tags({\n\t\t\t\t\ttags:[[\n\t\t\t\t\t\t{\"Obj\":\"object\"},\n\t\t\t\t\t\t{\"Arr\":\"array\"},\n\t\t\t\t\t\t{\"Num\":\"number\"},\n\t\t\t\t\t\t{\"Bool\":\"boolean\"},\n\t\t\t\t\t\t//{\"File\":\"file\"}\n\t\t\t\t\t].add(form.data.clip.type?{\"Clip\":\"clip\"}:undefined)],\n\t\t\t\t\tempty:{'Str':\"string\"},\n\t\t\t\t\ttagcss:'tag blue cp',\n\t\t\t\t\ttagshim:\"\"\n\t\t\t\t})\n\t\t\t}"
+			},
+			"#nkeytype": "function (d){return (d.isarray?'Index':'Key')}",
+			"#btn-to0": {
+				"bind": "function (d,v,$o){\n\t\t\t\tif (v!=null){\n\t\t\t\t\td.cmd = \"prepend\";\n\t\t\t\t\t$o.trigger(\"commit\");\n\t\t\t\t}\n\t\t\t\treturn d.keys[d.key]&&!d.isarray?'Replace':d.prepend;\n\t\t\t}",
+				"css": {
+					":disabled": "function (d){return !d.key}",
+					"self:red": "function (d){return d.keys[d.key]&&!d.isarray;}"
+				},
+				"watch": "#nkey"
+			},
+			"#btn-to1": {
+				"bind": "function (d,v,$o){\n\t\t\t\tif (v!=null){\n\t\t\t\t\td.cmd = \"append\";\n\t\t\t\t\t$o.trigger(\"commit\");\n\t\t\t\t}\n\t\t\t\treturn d.append;\n\t\t\t}",
+				"css": {
+					":disabled": "function (d){return !d.key}",
+					"self:hide": "function (d){return !d.append || /^\\d+$/.test(d.key) || d.keys[d.key]}"
+				},
+				"watch": "#nkey"
+			},
+			"#btn-cancel": "function (d,v,$o){\n\t\t\tif(v!=null) $o.trigger(\"cancel\");\n\t\t}"
+		},
+		"HTML": ["<div id=\"ntext\"></div>",
+			{
+				"label": "60px",
+				"row": "300px",
+				"rowCss": "my-row pt5 pb5"
+			},
+			["<span id=\"nkeytype\">Key</span>",
+				"inp#nkey.w100p",
+				"msg.mt2.mb-2"],
+			["Type",
+				"spn#ntype.div.vat"],
+			{
+				"rowCss": "my-row pt5 pb10 buttons ml50 pl10"
+			},
+			["",
+				"but#btn-to0.button.green.w80",
+				{
+					"txt": "Prepend"
+				},
+				"but#btn-to1.button.green.w80",
+				{
+					"txt": "Append"
+				},
+				"but#btn-cancel.button.w75",
+				{
+					"txt": "Cancel"
+				}]]
+	},
+	"Ls": "function (){\n\t\n\t// Local storage manager\n\tvar ls = window.localStorage;\n\t\n\tvar storage =  function LS (key0, data){\n\t\tvar x,  key = \"JSON.Editor.\"+key0;\n\t\tif (data) {\n\t\t\treturn ls.setItem(key, JSON.stringify(data));\n\t\t}\n\t\telse if (data===null || data===false) {\n\t\t\treturn ls.removeItem(key);\n\t\t}\n\t\telse {\n\t\t\tvar x = ls.getItem(key);\n\t\t\tif (Object.isString(x)) return JSON.parse(x);\n\t\t\telse return null;\n\t\t}\n\t};\n\t\n\treturn storage;\n\t\t}",
+	"style": {
+		" ": "font-size:11pt;font-family:'PT Mono',Monaco,'Lucida Console',monospace;min-height:500px;max-width:1500px;",
+		"": {
+			" textarea": "font-family:'PT Mono',Monaco,'Lucida Console',monospace;",
+			" .irow": "width:100%;display:inline-block; overflow:hidden;vertical-align:top; padding:0px 0px 0px 15px; border-left:1px solid #ddd;line-height:1.3em;",
+			" .irow:before": "content:\"\";position:absolute;top:15px;left:0;width:8px;border-bottom:1px solid #ddd;",
+			" .irow:last-child": "border:none;",
+			" .irow:last-child:after": "content:\"\";position:absolute;top:0;left:0;height:15px;border-left:1px solid #ddd;",
+
+			" .ikey": "width:115px;padding-right:10px;display:inline-block; word-break:break-all;font-size:95%; line-height:1.1em;opacity:0.7; overflow:hidden;vertical-align:top;margin:0.15em 0 0.4em 0px;",
+			" .ilabel": "font-size:80%;padding:0 5px; background-color: rgba(0,0,0,0.05); border-radius:2px;opacity:0.9; display:inline-block; margin:-1px 5px 0 0px;",
+			" .ivalue, .ilist": "word-break: break-all;",
+			" .ivalue, .ilist, .idesc": "width:100%;display:inline-block; overflow:hidden;vertical-align:top;",
+			" .ivalue": "cursor:pointer;",
+			" .imulti.ivalue": "cursor:inherit;",
+			" .iseditor .ivalue": "word-wrap: break-word; white-space:pre; padding:0.2em 0.4em 0.4em 0.5em; font-family:'PT Mono',Monaco,'Lucida Console',monospace; max-height:400px; overflow:auto;overflow:overlay; outline:none; border:1px solid rgba(0,0,0,0.2);font-size:90%; border-radius:2px;margin:-4px 0 -3px 0;tab-size:2; background-color:rgba(255,255,240,0.8);cursor:text;",
+			" .inav": "padding-left:115px;margin:4px 0;",
+			" .inav .ikey": "margin-left:-115px;",
+			" .iact": "position:absolute; top:3px; right:3px;opacity:0;transition:opacity 0.3s;border-radius:3px;",
+			" .iact:hover, .iact.hover": "display:block;opacity:1!important;",
+			" .inav:hover~.iact": "display:block;opacity:0.7;background:rgba(255,255,255,0.8);",
+			" .iact .button": "padding:0.25em 0.7em 0.15em 0.7em;margin-top:0;margin-bottom:0;",
+			" .doc": "padding:0; border:none;overflow:visible;",
+			" .doc:before, .doc:after": "display:none;",
+			" .doc": "background:white;padding:20px",
+			" .doc>.inav": "padding-left:120px;",
+			" .doc>.inav .ikey": "font-size:105%;font-weight:bold;margin:0 0 0 -120px;width:120px;",
+			" .doc>.iact": "opacity:0.3;top:-4px;right:0;",
+			" .tag.active": "background-color: rgba(135, 212, 0, 0.17)!important;color: rgb(65, 132, 0)!important;",
+			" .buttons button": "border-radius:0;margin-right:2px; padding:0.4em 0.7em 0.4em 0.7em;",
+			" .buttons button:last-child": "border-top-right-radius:4px; border-bottom-right-radius:4px; margin-right:0;",
+			" .buttons button:first-child": "border-top-left-radius:4px; border-bottom-left-radius:4px;",
+			" .buttons .button": "border-radius:0;margin-right:2px;",
+			" .buttons .button:last-child": "border-top-right-radius:4px; border-bottom-right-radius:4px; margin-right:0;",
+			" .buttons .button:first-child": "border-top-left-radius:4px; border-bottom-left-radius:4px;",
+			" .CodeMirror": "font:10pt 'PT Mono',Monaco,monospace;line-height:1.4em; height:300px;",
+			" .CodeMirror-linenumbers": "transition: background-color 0.3s;",
+			" .ed-error .CodeMirror-linenumbers": "background-color:rgba(255, 200, 200, 0.75);",
+			" a.base64image img": "background: white; border: 1px solid #ddd!important; padding: 3px; max-width: 10%; min-width: 5%; max-height: 60px;",
+			" .base64image~div": "width:87%;",
+			" .base64ico~div": "width:87%;",
+			" .w55": "width:55px;",
+			" .h55": "height:55px;"
+		}
+	},
+	"Db": "function ($o){\n\tvar f,\n\t\t\tthat = this,\n\t\t\tls = that.Ls,\n\t\t\tall = {};\n\tf = {\n\t\tget: function(key){\n\t\t\tvar pi = $.Deferred(),\n\t\t\t\t\tobj = ls(\"item.\"+key),\n\t\t\t\t\tkey = all[key]?all[key]:(all=ls(\"items\"), all[key]);\n\t\t\tif (Object.isObject(obj)) {\n\t\t\t\tpi.resolve.delay(0,obj, key);\n\t\t\t}\n\t\t\telse pi.reject.delay(0,null);\n\t\t\t\n\t\t\treturn pi.promise();\n\t\t},\n\t\tput: function(obj0){\n\t\t\tvar pi = $.Deferred(),\n\t\t\t\t\tobj = Object.select(obj0,[\"_id\",\"_rev\",\"title\", \"_attachments\",\"doc\",\"viewstate\"]);\n\t\t\tobj.stamp = Date.now();\n\t\t\tobj.type = \"jsoneditor\";\n\t\t\t\n\t\t\tif (!obj._id) {\n\t\t\t\tif (obj.doc._id) obj._id = obj.doc._id;\n\t\t\t\telse if (Object.isString(obj.doc.id) && obj.doc.id) obj._id = obj.doc.id;\n\t\t\t\telse obj._id = Date.now()+\"\"+Number.random(46656, 1679615).toString(36);\n\t\t\t}\n\t\t\t\n\t\t\tif (!obj._rev) {\n\t\t\t\tif (obj.doc._rev) obj._rev = obj.doc._rev;\n\t\t\t\telse obj._rev = \"0\";\n\t\t\t}\n\t\t\t\n\t\t\tobj._rev = (++obj._rev.split(\"-\")[0])+\"-\"+Number.random(0,4294967295).toString(16).padLeft(8,\"0\");\n\t\t\t\n\t\t\tls(\"item.\"+obj._id, obj);\n\t\t\tall =  ls(\"items\")||{};\n\t\t\tall[obj._id] = {\n\t\t\t\tid:obj._id,\n\t\t\t\trev:obj._rev,\n\t\t\t\tstamp:obj.stamp,\n\t\t\t\ttitle:obj.title \n\t\t\t\t\t|| obj.doc.title \n\t\t\t\t\t|| obj.doc.name \n\t\t\t\t\t|| obj.doc.id\n\t\t\t\t\t|| (obj.doc.type?\"Untitled \"+obj.doc.type:\"\") \n\t\t\t\t\t|| \"Untitled JSON\"\n\t\t\t};\n\t\t\tls(\"items\",all);\n\t\t\t\n\t\t\t(function(){\n\t\t\t\tpi.resolve(obj);\n\t\t\t\t$o.trigger(\"radio\",{channel:\"/db/update\", message:[obj._id]});\n\t\t\t}).delay(1, obj);\n\t\t\t\n\t\t\t\n\t\t\treturn pi.promise();\n\t\t\t\n\t\t},\n\t\tkeys: function(lim, ofs){\n\t\t\tvar pi = $.Deferred()\n\t\t\tall =  ls(\"items\")||{};\n\t\t\tvar i, res ={},a = Object.values(all).sortBy(\"stamp\", true);\n\t\t\ta = a.slice(ofs||0,lim||100);\n\t\t\tpi.resolve.delay(0,a);\n\t\t\treturn pi.promise();\n\t\t},\n\t\tkey: function(id){\n\t\t\treturn a\n\t\t}\n\t} \n\t\n\treturn f;\n\t\t}"
+}

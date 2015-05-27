@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en" ng-app="myApp">
+<head>
+  <base href="../">
+  <meta charset="utf-8">
+  <title>Smileupps CouchOS</title>
+  <META NAME="author" CONTENT="www.smileupps.com">
+  <META NAME="description" CONTENT="Web tools for Couchapps and CouchDB management">
+
+  <!--<link rel="stylesheet" href="_editor/common/css/cw.general.css">
+  <link rel="stylesheet" href="_editor/common/css/cw.css">
+  <link rel="stylesheet" href="_editor/common/css/all.min.css">
+  <link rel="stylesheet" href="_editor/common/css/app.css">-->
+
+  <link rel="stylesheet" href="_editor/common/css/json-editor-dejong.css">
+
+  <!--<script src="_editor/common/js/jquery-1.10.2.min.js"></script>-->
+  <script src="_editor/common/js/cw.general.js"></script>
+  <script src="_editor/common/js/angular.min.js"></script>
+  <script src="_editor/common/js/ui-bootstrap-tpls-0.12.0.min.js"></script>
+  <script src="_editor/common/js/widgets.min.js"></script>
+  <script src="_editor/common/js/notifications.min.js"></script>
+  <script src="_editor/common/js/json-editor-dejong.js"></script>
+  <script src="_editor/common/js/ng/ng-jsoneditor.js"></script>
+
+  <script src="_editor/common/js/jszip.js"></script>
+  <script src="_editor/common/js/jszip-utils.js"></script>
+  <script src="_editor/common/js/mime-types.js"></script>
+  <script src="_editor/common/js/handlebars-v3.0.3.js"></script>
+
+  <script src="_editor/common/js/ng/f_happy.js"></script>
+  <script src="_editor/common/js/ng/d_widgets.js"></script>
+  <script src="_editor/js/app.js"></script>
+  <script src="_editor/common/js/ng/c_user.js"></script>
+  <script src="_editor/common/js/json-stable-stringify.js"></script>
+
+
+</head>
+<body ng-controller="AppCtrl" ng-keyup="keyup($event)">
+
+	<div class="container">
+
+    <form ng-controller="LoginCtrl" ng-if="!happy.loggedIn" style="width:600px;margin:100px auto 0;">
+      <h1 class="text-center">Smileupps CouchOS</h1>
+      <p class="text-center">Web tools for Couchapps and CouchDB management</p>
+      <div class="text-center">
+        <a href="/_editor" target="_blank" class="button mr10 p10">Couchapp Editor</a>
+        <a href="/_costco" target="_blank" class="button mr10 p10">Bulk Docs</a>
+        <a href="/_utils" target="_blank" class="button mr10 p10">Futon</a>
+        <a href="/_utils/fauxton/" target="_blank" class="button mr10 p10">Fauxton</a>
+      </div>
+
+      <ul class="note">
+        <li>This app is a couchapp itself, stored inside your CouchDB instance. <strong>Please don't remove it</strong> from <i>/smileupps/_design/couchos</i>!!!</li>
+        <li><strong>CouchDB API and all tools above are restricted to administrators only</strong>. To increase security further, you may also remove root access domain completely, <strong>allowing access only through secure Couchapp-controlled domains</strong>. You can add/edit/remove all domains pointing to this instance from your <a href="https://www.smileupps.com/my/">Smileupps control panel</a>.</li>
+        <li>Source code of this app can be found on <a href="https://github.com/Smileupps/couchapp-editor" target="_blank">Github</a></li>
+        <li>Thanks to <a href="https://github.com/ermouth" target="_blank">ermouth</a> and <a href="https://github.com/harthur" target="_blank">harthur</a> for contributions</li>
+      </ul>
+      <p>Enter your CouchDB administrator credentials:</p>
+      <label for="inputEmail" class="sr-only">Username</label>
+      <input type="text" id="inputEmail" class="form-control" placeholder="Username" required autofocus ng-model="fields.username">
+      <label for="inputPassword" class="sr-only">Password</label>
+      <input type="password" id="inputPassword" class="form-control" placeholder="Password" required ng-model="fields.password">
+      <div class="text-center"><button ng-click="submit('login')" class="button  p10">Sign in</button></div>
+    </form>
+
+    <div class="tabs-left" ng-show="happy.loggedIn">
+        <ul class="nav nav-tabs tabs-left docslist" style="width:30%; max-width:350px;float:left;">
+          <li class="text-center">
+            <h1 class="text-center">Couchapp Editor</h1>
+            <div>
+            <button ng-click="save()" class="button  mr10 p10">Save</button>              
+            <a href="/_costco" target="_blank" class="button mr5 p5">Bulk</a>
+            <a href="/_utils" target="_blank" class="button mr5 p5">Futon</a>
+            <a href="/_utils/fauxton/" target="_blank" class="button mr5 p5">Fauxton</a>
+            </div>
+          </li>
+
+          <li class="text-center">
+            <button ng-click="submit('logout')" class="button  mr10 p10">Sign out</button><button ng-click="newDdoc()" class="button p10"><i class="fi fi-plus"></i> New DDoc</button>
+            <p class="note text-center">You can also duplicate an existing ddoc from the list below, by changing its <i>target database</i> and/or <i>_id</i></p>
+          </li>
+          <li class="note text-center">
+            <input type="checkbox" id="modifiers_handlebars" /> <a href="https://www.smileupps.com/couchapp-server-side-dynamic-websites" target="_blank">Precompile handlebars templates before saving</a>
+          </li>
+          <li class="text-center"><span style="width:30%"><i class="fi-filter"></i>&thinsp;&thinsp;<a href="javascript:void(0);" ng-click="cleanField('__id')" class="button red">&thinsp;<i class="fi fi-x"></i>&thinsp;</a></span><input type="text" ng-model="ddocsfilter['__id']" style="width:70%" placeholder="db-name/ddoc-id" /></li>
+            <li>
+              <p class="note text-center">Click on green ddoc ids to edit</p>
+              <table style="width:100%">
+              <tr ng-repeat="doc in docs|filter: ddocsfilter|orderBy:'__id'" ng-class="{'active':tabSelected=='tab-'+doc.__id}">
+                <td class="text-right">
+                  <a title="DB in Futon" target="_blank" href="/_utils/database.html?{{doc.__id.split('/')[0]}}" class="button blue">F</a><a title="Filter DB" href="javascript:void(0);" ng-click="filterdb(doc.__id.split('/')[0])" class="button blue"><span>{{doc.__id.split("/")[0]}}</span></a>
+                </td>
+                <td class="text-left">
+                  <a title="Edit DDoc" id="tab-{{doc.__id}}" data-toggle="tab" ng-click="openDdoc(doc.__id)" class="button green">{{doc._id.substring(8)}}</a><a title="DDoc in Futon" target="_blank" href="/_utils/document.html?{{doc.__id.split('/').insert('_design',1).join('/')}}" class="button green">F</a><a title="Delete DDoc" href="javascript:void(0)" ng-click="confirmDeleteDoc(doc.__id)" class="button red"><i class="fi-x"></i></a>
+                  
+                </td>
+                <!--<td>
+                  <a title="Filter" href="javascript:void(0);" ng-click="filterdb(doc.__id.split('/')[1])"><span class="fi fi-filter"></span> </a>
+                                 </td> -->
+              </tr>
+              </table>
+            </li>
+        </ul>  
+        <div class="tab-content" style="margin:0;width:60%;float:right;">
+          <div ng-jsoneditor ng-model="obj.data" options="obj.options" style=""></div>
+        </div>
+    </div>
+
+  </div> <!-- /container -->
+
+
+</body>
+</html>

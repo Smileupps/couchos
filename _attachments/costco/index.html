@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en" ng-app="myApp">
+<head>
+  <base href="../">
+  <meta charset="utf-8">
+  <title>Smileupps CouchOS</title>
+  <META NAME="author" CONTENT="www.smileupps.com">
+  <META NAME="description" CONTENT="Web tools for Couchapps and CouchDB management">
+
+  <link rel="stylesheet" href="_editor/common/css/cw.general.css">
+  <link rel="stylesheet" href="_editor/common/css/cw.css">
+  <link rel="stylesheet" href="_editor/common/css/all.min.css">
+  <link rel="stylesheet" href="_editor/common/css/app.css">
+
+  <!--<script src="_editor/common/js/jquery-1.10.2.min.js"></script>-->
+  <script src="_editor/common/js/cw.general.js"></script>
+  <script src="_editor/common/js/angular.min.js"></script>
+  <script src="_editor/common/js/ui-bootstrap-tpls-0.12.0.min.js"></script>
+  <script src="_editor/common/js/widgets.min.js"></script>
+  <script src="_editor/common/js/notifications.min.js"></script>
+
+  <script src="_editor/common/js/ng/f_happy.js"></script>
+  <script src="_editor/common/js/ng/d_widgets.js"></script>
+  <script src="_editor/js/app.js"></script>
+  <script src="_editor/common/js/ng/c_user.js"></script>
+
+   <link rel="stylesheet" href="_costco/costco.css" type="text/css">
+   <script src="_costco/jquery.min.js" type="text/javascript"></script>
+   <script src="_costco/jquery.couch.js" type="text/javascript"></script>
+   <script src="_costco/jquery.couch.app.js" type="text/javascript"></script>
+   <script src="_costco/costco.js" type="text/javascript"></script>
+   <script src="_costco/underscore-min.js" type="text/javascript"></script>
+
+</head>
+<body ng-controller="AppCtrl">
+
+	<div class="container">
+
+    <form ng-controller="LoginCtrl" ng-if="!happy.loggedIn" style="width:600px;margin:100px auto 0;">
+      <h1 class="text-center">Smileupps CouchOS</h1>
+      <p class="text-center">Web tools for Couchapps and CouchDB management</p>
+      <div class="text-center">
+        <a href="/_editor/index.html" target="_blank" class="button mr10 p10">Couchapp Editor</a>
+        <a href="/_costco/index.html" target="_blank" class="button mr10 p10">Bulk Docs</a>
+        <a href="/_utils/index.html" target="_blank" class="button mr10 p10">Futon</a>
+        <a href="/_utils/fauxton/index.html" target="_blank" class="button mr10 p10">Fauxton</a>
+      </div>
+
+      <ul class="note">
+        <li>This app is a couchapp itself, stored inside your CouchDB instance. <strong>Please don't remove it</strong> from <i>/smileupps/_design/couchos</i>!!!</li>
+        <li><strong>CouchDB API and all tools above are restricted to administrators only</strong>. To increase security further, you may also remove root access domain completely, <strong>allowing access only through secure Couchapp-controlled domains</strong>. You can add/edit/remove all domains pointing to this instance from your <a href="https://www.smileupps.com/my/">Smileupps control panel</a>.</li>
+        <li>Source code of this app can be found on <a href="https://github.com/Smileupps/couchapp-editor" target="_blank">Github</a></li>
+        <li>Thanks to <a href="https://github.com/ermouth" target="_blank">ermouth</a> and <a href="https://github.com/harthur" target="_blank">harthur</a> for contributions</li>
+      </ul>
+      <p>Enter your CouchDB administrator credentials:</p>
+      <label for="inputEmail" class="sr-only">Username</label>
+      <input type="text" id="inputEmail" class="form-control" placeholder="Username" required autofocus ng-model="fields.username">
+      <label for="inputPassword" class="sr-only">Password</label>
+      <input type="password" id="inputPassword" class="form-control" placeholder="Password" required ng-model="fields.password">
+      <div class="text-center"><button ng-click="submit('login')" class="button  p10">Sign in</button></div>
+    </form>
+
+    <div ng-show="happy.loggedIn">
+      <div id="container">
+        <div class="text-center">
+          <h1 class="text-center">Costco Bulk Docs Editor</h1>
+
+          <button ng-click="submit('logout')" class="button  mr10 p10">Sign out</button><a href="/_editor/index.html" target="_blank" class="button mr10 p10">Couchapp Editor</a>
+          <a href="/_utils/index.html" target="_blank" class="button mr10 p10">Futon</a>
+          <a href="/_utils/fauxton/index.html" target="_blank" class="button mr10 p10">Fauxton</a>
+        </div>
+        <ol>
+          <li>
+            <div>Select Database:
+              <select id="db-select">
+                <optgroup id="existing-dbs">
+                </optgroup>
+              </select>
+            </div>
+          </li>
+          <li>
+            <div id="map-container">
+              <div id="map-message">Edit function 
+              <span id="add-message">or JSON docs to add</span>:<a id="examples" href="http://harthur.github.com/costco/#examples" target=_blank>examples</a></div>
+              <textarea id="map-function"></textarea>
+            </div>
+          </li>
+          <li><span id="update-button" class="button">Update Docs</span></li>
+          <li>
+
+            <div id="status">Click Update to calculate changes</div>
+
+            <div id="update-container">
+              <div>
+                <span id="continue-button" class="button">Continue</span>
+                <span id="cancel-button" class="button">Cancel</span>
+              </div>
+            </div>
+          </li>
+        </ol>
+      </div>
+    </div>
+
+  </div> <!-- /container -->
+
+
+</body>
+</html>

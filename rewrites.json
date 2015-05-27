@@ -1,0 +1,71 @@
+[
+   {
+       "from": "/public/_costco",
+       "to"   :"_show/redirect",
+       "query":{
+          "to":"./_costco/index.html"
+       }
+   },
+   {
+       "from": "/public/_costco/*",
+       "to": "/costco/*"
+   },   
+   {
+       "from": "/public/_editor",
+       "to"   :"_show/redirect",
+       "query":{
+          "to":"./_editor/index.html"
+       }
+   },
+  {
+    "method":"GET",
+    "from" : "/public/_editor/common/*",
+    "to" : "common/*"
+  },
+  {
+    "method":"GET",
+    "from" : "/public/_editor/fonts/*",
+    "to" : "common/fonts/*"
+  },
+   {
+       "from": "/public/_editor/*",
+       "to": "/frontend/*"
+   },
+   {
+       "from": "/public/_utils",
+       "to"   :"_show/redirect",
+       "query":{
+          "to":"./_utils/index.html"
+       }
+   },
+   {
+       "to": "../../../_utils/fauxton/*",
+       "from": "/public/_utils/fauxton/*"
+   },
+   {
+       "to": "../../../_utils/fauxton/index.html",
+       "from": "/public/_utils/fauxton/"
+   },
+   {
+       "to": "../../../_utils/*",
+       "from": "/public/_utils/*"
+   },
+   {
+       "to": "../../../_session",
+       "from": "/public/_session"
+   },
+   {
+       "to": "../../../",
+       "from": "/public/"
+   },
+  {
+    "from" : "/public/*",
+    "to" : "../../../_users/_design/_forward/_rewrite/smileupps/_design/_couchos/_rewrite/*"
+  },
+   {
+       "to": "../../../*",
+       "from": "/*"
+   }
+]
+
+  

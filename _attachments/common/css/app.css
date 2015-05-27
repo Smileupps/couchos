@@ -1,0 +1,83 @@
+body {
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.tabs-left .nav-tabs {
+  margin:0;
+}
+
+.form-signin {
+  max-width: 330px;
+  padding: 15px;
+  margin: 0 auto;
+}
+.form-signin .form-signin-heading,
+.form-signin .checkbox {
+  margin-bottom: 10px;
+}
+.form-signin .checkbox {
+  font-weight: normal;
+}
+.form-signin .form-control {
+  position: relative;
+  height: auto;
+  -webkit-box-sizing: border-box;
+     -moz-box-sizing: border-box;
+          box-sizing: border-box;
+  padding: 10px;
+  font-size: 16px;
+}
+.form-signin .form-control:focus {
+  z-index: 2;
+}
+.form-signin input[type="email"] {
+  margin-bottom: -1px;
+  border-bottom-right-radius: 0;
+  border-bottom-left-radius: 0;
+}
+.form-signin input[type="password"] {
+  margin-bottom: 10px;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+}
+
+ul.docslist>li>a{
+  font-size:1em;
+  color:#666;
+  margin:0;
+  padding:0;
+  display:inline;
+}
+ul.docslist>li.active>a{
+-webkit-box-shadow:none!important;
+box-shadow:none!important;
+border: none!important;
+margin: none!important;
+color:none!important;
+background-color:none!important;
+}
+ul.docslist>li.active{
+background-color:#fff;
+padding:10px 0;
+font-size:1.1em;
+}
+ul.docslist>li.active>a:hover{
+  text-decoration: underline;
+}
+ul.docslist>li>a:hover{
+  text-decoration: underline;
+  border: none;
+}
+ul.docslist>li{
+  border-bottom:dashed 1px #ddd;
+  padding:3px;
+  margin:0;
+}
+ul.docslist>li>a>span{
+  font-size:0.9em;
+  color:#aaa;
+}
+.container:{
+  width:100%;
+}
