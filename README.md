@@ -23,4 +23,4 @@ Smileupps CouchOS provides useful tools for in-browser Couchapp editing and easy
 
 This app is delivered as part of the [Smileupps CouchDB Hosting application](https://www.smileupps.com/store/apps/couchdb). After installation, you should receive an activation e-mail with URLs and credentials to run it.
 
-You can otherwise also download this repository to your local disk, and upload it back to your own CouchDB instance, using a [CouchDB deployment tool](https://www.smileupps.com/wiki).
+You can otherwise also download this repository to your local disk, and upload it back to your own CouchDB instance, using a [CouchDB deployment tool](https://www.smileupps.com/wiki). Please note that this app requires [couchapp-forward](https://github.com/Smileupps/couchapp-forward) to be pushed to your instance  *_users* database.
