@@ -1,9 +1,9 @@
-# Smileupps CouchOS
-https://github.com/Smileupps/couchos
+# SmileOS
+https://github.com/Smileupps/smileos
 
 ## Purpose 
 
-Smileupps CouchOS provides useful tools for in-browser Couchapp editing and easy CouchDB documents management.
+SmileOS provides useful tools for in-browser Couchapp editing and easy CouchDB documents management.
 
 ## Web Tools included:
 
