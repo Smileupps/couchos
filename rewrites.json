@@ -60,7 +60,7 @@
    },
   {
     "from" : "/public/*",
-    "to" : "../../../_users/_design/_forward/_rewrite/smileupps/_design/_couchos/_rewrite/*"
+    "to" : "../../../_users/_design/_forward/_rewrite/smileupps/_design/_smileos/_rewrite/*"
   },
    {
        "to": "../../../*",

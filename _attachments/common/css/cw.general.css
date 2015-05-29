@@ -32,6 +32,30 @@ img.loading{
 	display:none;
 }
 
+div.welcome{
+	padding:1em;
+	line-height:1.5em;
+}
+div.welcome p{
+	padding:1em;
+}
+div.welcome ul{
+	margin:2em 0 0 1em;
+}
+div.welcome ol{
+	margin:1em;
+}
+div.welcome div{
+	margin-left:2em;
+}
+div.welcome ul>li {
+	margin: 2em 0;
+}
+div.welcome ol>li {
+	margin: 1em 0;
+}
+
+
 body {
 	padding:0; 
 	color:#333;

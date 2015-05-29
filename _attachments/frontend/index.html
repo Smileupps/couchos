@@ -3,7 +3,7 @@
 <head>
   <base href="../">
   <meta charset="utf-8">
-  <title>Smileupps CouchOS</title>
+  <title>SmileOS</title>
   <META NAME="author" CONTENT="www.smileupps.com">
   <META NAME="description" CONTENT="Web tools for Couchapps and CouchDB management">
 
@@ -36,7 +36,7 @@
 	<div class="container">
 
     <form ng-controller="LoginCtrl" ng-if="!happy.loggedIn" style="width:600px;margin:100px auto 0;">
-      <h1 class="text-center">Smileupps CouchOS</h1>
+      <h1 class="text-center">Smileupps SmileOS</h1>
       <p class="text-center">Web tools for Couchapps and CouchDB management</p>
       <div class="text-center">
         <a href="/_editor/index.html" target="_blank" class="button mr10 p10">Couchapp Editor</a>
@@ -46,7 +46,7 @@
       </div>
 
       <ul class="note">
-        <li>This app is a couchapp itself, stored inside your CouchDB instance. <strong>Please don't remove it</strong> from <i>/smileupps/_design/_couchos</i>!!!</li>
+        <li>This app is a couchapp itself, stored inside your CouchDB instance. <strong>Please don't remove it</strong> from <i>/smileupps/_design/_smileos</i>!!!</li>
         <li><strong>CouchDB API and all tools above are restricted to administrators only</strong>. To increase security further, you may also remove root access domain completely, <strong>allowing access only through secure Couchapp-controlled domains</strong>. You can add/edit/remove all domains pointing to this instance from your <a href="https://www.smileupps.com/my/">Smileupps control panel</a>.</li>
         <li>Source code of this app can be found on <a href="https://github.com/Smileupps/couchapp-editor" target="_blank">Github</a></li>
         <li>Thanks to <a href="https://github.com/ermouth" target="_blank">ermouth</a> and <a href="https://github.com/harthur" target="_blank">harthur</a> for contributions</li>
@@ -106,8 +106,41 @@
             <li class="note pt20 pb20 text-center">
                 &copy; 2015 <a target="_blank" href="https://www.smileupps.com" class="blue">smileupps</a>, <a target="_blank" href="https://github.com/ermouth" class="blue">ermouth</a>.
             </li>
+            <li class="note text-center">
+              <p>For any bugfix or feedback, please <a href="https://www.smileupps.com/my" target="_blank">contact us</a></p>
+            </li>
         </ul>  
         <div class="tab-content col-xs-8 col-sm-8 col-md-9" style="margin:0px">
+          <div class="welcome">
+            <h1>Welcome to Couchapp Editor!</h1>
+            <ul>
+            <li>
+              <strong>Look at some design doc example first,</strong> clicking on green ids within the left sidebar.
+            </li>
+            <li><strong>Design document list can be filtered</strong> filling the filter field, or clicking on a blue database name from the list.
+            </li>
+            <li><strong>To serve and run these examples</strong> you must use a dedicated domain. If you are using Smileupps CouchDB Hosting, you should have received these links within activation e-mail. However, please note you can always create or drop any domain from your <a href="https://www.smileupps.com/my" target="_blank">Smileupps control panel</a>. Usually, if your design document is named <i>_design/myapp</i> and is stored in <i>mydatabase</i>, it will be sufficient to define an <strong>access domain with path <i>/mydatabase/_design/myapp/_rewrite</strong></i>.
+            </li>
+            <li>
+              You can <strong>upgrade SmileOS</strong> anytime, by <a href="/_utils/replicator.html" target="_blank">replicating</a>:
+              <div>
+                <ol>
+                  <li>from Remote database: <i>https://distrib-smileupps.smileupps.com/</i></li>
+                  <li>to Local database: <i>smileupps</i></li>
+                </ol>
+              </div>
+            </li>
+            <li>
+              You can as well <strong>sync latest Examples</strong>, by <a href="/_utils/replicator.html" target="_blank">replicating</a>:
+              <div>              
+                <ol>
+                  <li>from Remote database: <i>https://distrib-examples.smileupps.com/</i></li>
+                  <li>to Local database: <i>examples</i></li>
+                </ol>
+              </div>
+            </li>
+            </ul>
+          </div>
 
         </div>
     </div>
